@@ -23,6 +23,9 @@ fi
 "$cmake_bin" --build "$project_dir/build-mac" --config Release --parallel 3
 "$cmake_bin" --build "$project_dir/build-mac" --config Release --target test
 plugin_source="$project_dir/build-mac/FluteShift_artefacts/Release/VST3/FluteShift.vst3"
+# JUCE generates moduleinfo.json after linking. Seal the completed bundle.
+codesign --force --sign - --timestamp=none "$plugin_source"
+codesign --verify --deep --strict --verbose=2 "$plugin_source"
 plugin_dest="$HOME/Library/Audio/Plug-Ins/VST3/FluteShift.vst3"
 mkdir -p "$(dirname "$plugin_dest")"
 if [[ -e "$plugin_dest" ]]; then

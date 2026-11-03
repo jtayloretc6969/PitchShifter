@@ -16,7 +16,8 @@ In Finder choose **Go → Go to Folder**, enter
 `~/Library/Audio/Plug-Ins/VST3/`, and copy `FluteShift.vst3` there. Create that
 folder if it does not exist. In Ableton Live enable **VST3 system folders** in
 **Settings → Plug-Ins**, click **Rescan**, and add FluteShift to an audio track.
-The build is unsigned and not notarized; macOS may require additional approval
+The completed bundle is ad-hoc signed and verified after manifest generation.
+It is not Developer ID signed or notarized; macOS may require additional approval
 before Live can load it. Successful CI does not establish live performance readiness.
 
 For source code, use **Code → Download ZIP**. To build and install locally,
@@ -69,7 +70,7 @@ the same Transpose parameter; they are not separate MIDI targets.
 
 The GitHub Actions workflow builds a universal macOS VST3 ZIP when this repository
 is pushed or its workflow is manually triggered. That workflow has not been run
-from this workspace. Builds are unsigned and are not notarized distribution
+from this workspace. Builds are ad-hoc signed and are not notarized distribution
 packages. The standalone application is also built for audio-device testing.
 
 ## Validate without JUCE

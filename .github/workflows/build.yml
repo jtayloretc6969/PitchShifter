@@ -14,6 +14,12 @@ jobs:
         run: cmake --build build --config Release --parallel 3
       - name: Run DSP tests
         run: ctest --test-dir build -C Release --output-on-failure
+      - name: Sign and verify completed VST3 bundle
+        run: |
+          plugin="build/FluteShift_artefacts/Release/VST3/FluteShift.vst3"
+          codesign --force --sign - --timestamp=none "$plugin"
+          codesign --verify --deep --strict --verbose=2 "$plugin"
+          lipo -verify_arch arm64 x86_64 "$plugin/Contents/MacOS/FluteShift"
       - name: Package
         run: ditto -c -k --sequesterRsrc --keepParent build/FluteShift_artefacts/Release/VST3/FluteShift.vst3 FluteShift-macOS-universal.zip
       - uses: actions/upload-artifact@v4
