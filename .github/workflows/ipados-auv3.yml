@@ -1,6 +1,9 @@
 name: iPadOS AUv3 unsigned test build
 
 on:
+  push:
+    branches:
+      - feature/ipados-auv3
   workflow_dispatch:
 
 permissions:
