@@ -1,0 +1,59 @@
+name: iPadOS AUv3 unsigned test build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          cmake --version
+      - name: Configure iPadOS AUv3
+        run: |
+          cmake -S . -B build-ios-ci -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
+            -DFLUTESHIFT_JUCE_TAG=8.0.12
+      - name: Build containing app (unsigned)
+        run: |
+          cmake --build build-ios-ci --config Release \
+            --target FluteShift_Standalone --parallel 4 -- CODE_SIGNING_ALLOWED=NO
+      - name: Package app and verify AUv3 extension
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t app_candidates < <(find build-ios-ci -type d -name '*.app' -path '*Standalone*' -not -path '*/_deps/*')
+          if [[ "${#app_candidates[@]}" -ne 1 ]]; then
+            printf 'Expected one standalone iOS app, found %s\n' "${#app_candidates[@]}"
+            printf '%s\n' "${app_candidates[@]}"
+            exit 1
+          fi
+          app="${app_candidates[0]}"
+          extension_count=$(find "$app" -type d -name '*.appex' | wc -l | tr -d ' ')
+          if [[ "$extension_count" -lt 1 ]]; then
+            echo 'No embedded AUv3 extension found. Failing rather than distributing an unusable app.'
+            exit 1
+          fi
+          mkdir -p dist/Payload
+          ditto "$app" "dist/Payload/$(basename "$app")"
+          (
+            cd dist
+            ditto -c -k --sequesterRsrc --keepParent Payload FluteShift-unsigned.ipa
+          )
+          echo 'Unsigned IPA packaged; requires signing with your own Apple account before installation.'
+      - name: Upload unsigned installation package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FluteShift-iPadOS-unsigned
+          path: dist/FluteShift-unsigned.ipa
+          if-no-files-found: error
