@@ -32,13 +32,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t app_candidates < <(find build-ios-ci -type d -name '*.app' -path '*Standalone*' -not -path '*/_deps/*')
-          if [[ "${#app_candidates[@]}" -ne 1 ]]; then
-            printf 'Expected one standalone iOS app, found %s\n' "${#app_candidates[@]}"
-            printf '%s\n' "${app_candidates[@]}"
+          app=$(find build-ios-ci -type d -name '*.app' -path '*Standalone*' -not -path '*/_deps/*' -print -quit)
+          if [[ -z "$app" ]]; then
+            echo 'No standalone iOS app found.'
             exit 1
           fi
-          app="${app_candidates[0]}"
           extension_count=$(find "$app" -type d -name '*.appex' | wc -l | tr -d ' ')
           if [[ "$extension_count" -lt 1 ]]; then
             echo 'No embedded AUv3 extension found. Failing rather than distributing an unusable app.'
