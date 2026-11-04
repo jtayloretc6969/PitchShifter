@@ -17,12 +17,12 @@ if(FLUTESHIFT_BUILD_PLUGIN)
   include(FetchContent)
   FetchContent_Declare(JUCE GIT_REPOSITORY https://github.com/juce-framework/JUCE.git GIT_TAG 51a8a6d7aeae7326956d747737ccf1575e61e209)
   FetchContent_MakeAvailable(JUCE)
-  set(FLUTESHIFT_FORMATS ${FLUTESHIFT_FORMATS})
+  set(FLUTESHIFT_FORMATS VST3 Standalone)
   if(FLUTESHIFT_IOS)
     set(FLUTESHIFT_FORMATS AUv3 Standalone)
   endif()
   juce_add_plugin(FluteShift COMPANY_NAME "FluteShift" BUNDLE_ID "audio.fluteshift.live"
-    PLUGIN_MANUFACTURER_CODE Flsh PLUGIN_CODE Fs01 FORMATS VST3 Standalone
+    PLUGIN_MANUFACTURER_CODE Flsh PLUGIN_CODE Fs01 FORMATS ${FLUTESHIFT_FORMATS}
     PRODUCT_NAME "FluteShift" IS_SYNTH FALSE NEEDS_MIDI_INPUT FALSE NEEDS_MIDI_OUTPUT FALSE
     COPY_PLUGIN_AFTER_BUILD FALSE)
   target_sources(FluteShift PRIVATE Source/PluginProcessor.cpp Source/PluginEditor.cpp)
